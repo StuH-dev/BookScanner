@@ -10,56 +10,90 @@ struct AuthorSearchView: View {
     private let googleBooksService = GoogleBooksService()
     
     var body: some View {
-        VStack {
-            // Search Bar
-            HStack {
-                TextField("Enter author name", text: $searchText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.words)
-                
-                Button(action: performSearch) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.blue)
-                }
-            }
-            .padding()
+        ZStack {
+            BackgroundView()
             
-            if isSearching {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-            } else if let error = searchError {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding()
-            } else if books.isEmpty && !searchText.isEmpty {
-                Text("No books found")
-                    .foregroundColor(.secondary)
-                    .padding()
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(books, id: \.isbn) { book in
-                            NavigationLink(destination: BookDetailView(book: book, toggleRead: {
-                                library.toggleRead(book)
-                            }, isRead: {
-                                library.isRead(book)
-                            }, library: library)) {
-                                BookRowView(book: book)
-                                    .overlay(alignment: .topTrailing) {
-                                        if library.books.contains(where: { $0.isbn == book.isbn }) {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .foregroundColor(.green)
-                                                .padding(8)
-                                        }
+            VStack(spacing: 0) {
+                // Search Bar
+                HStack {
+                    TextField("Enter author name", text: $searchText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.words)
+                    
+                    Button(action: performSearch) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.blue)
+                    }
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                
+                // Content
+                if isSearching {
+                    Spacer()
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    Spacer()
+                } else if let error = searchError {
+                    Spacer()
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                    Spacer()
+                } else if books.isEmpty && !searchText.isEmpty {
+                    Spacer()
+                    Text("No books found")
+                        .foregroundColor(.secondary)
+                        .padding()
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(books, id: \.isbn) { book in
+                                HStack {
+                                    NavigationLink {
+                                        BookDetailView(book: book, toggleRead: {
+                                            library.toggleRead(book)
+                                        }, isRead: {
+                                            library.isRead(book)
+                                        }, library: library)
+                                    } label: {
+                                        BookRowView(book: book)
                                     }
+                                    .buttonStyle(.plain)
+                                    
+                                    // Add a button to add the book to the library
+                                    Button(action: {
+                                        library.addBook(book)
+                                    }) {
+                                        Image(systemName: library.books.contains(where: { $0.isbn == book.isbn }) 
+                                              ? "checkmark.circle.fill" 
+                                              : "plus.circle.fill")
+                                            .foregroundColor(library.books.contains(where: { $0.isbn == book.isbn }) 
+                                                            ? .green 
+                                                            : .blue)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .padding(.trailing)
+                                }
+                                .overlay(alignment: .topTrailing) {
+                                    if library.books.contains(where: { $0.isbn == book.isbn }) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                            .padding(8)
+                                    }
+                                }
                             }
                         }
+                        .padding()
                     }
-                    .padding()
+                    .background(.ultraThinMaterial)
                 }
             }
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .padding()
         }
-        .navigationTitle("Author Search")
+        .navigationTitle("Search by Author")
     }
     
     private func performSearch() {

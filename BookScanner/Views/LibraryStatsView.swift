@@ -3,39 +3,60 @@ import SwiftUI
 struct LibraryStatsView: View {
     let totalBooks: Int
     let readBooks: Int
+    let lentBooks: Int
+    @Binding var showingLentBooks: Bool
     
     var body: some View {
-        HStack(spacing: 20) {
-            StatBox(title: "Total Books", value: totalBooks)
-            StatBox(title: "Books Read", value: readBooks)
-            StatBox(title: "Completion", value: totalBooks > 0 ? Int((Double(readBooks) / Double(totalBooks)) * 100) : 0, suffix: "%")
+        HStack(spacing: 16) {
+            StatView(title: "Total", value: totalBooks, icon: "books.vertical")
+            
+            Divider()
+                .frame(height: 25)
+            
+            StatView(title: "Read", value: readBooks, icon: "checkmark.circle")
+            
+            Divider()
+                .frame(height: 25)
+            
+            Button(action: {
+                showingLentBooks.toggle()
+            }) {
+                StatView(title: "Lent", value: lentBooks, icon: "person.fill")
+                    .foregroundColor(.primary)
+            }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
-struct StatBox: View {
+struct StatView: View {
     let title: String
     let value: Int
-    var suffix: String = ""
+    let icon: String
     
     var body: some View {
-        VStack(spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(.blue)
             
-            Text("\(value)\(suffix)")
-                .font(.title2)
-                .fontWeight(.bold)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(value)")
+                    .font(.system(size: 16, weight: .semibold))
+                
+                Text(title)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color.secondary.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 
 #Preview {
-    LibraryStatsView(totalBooks: 10, readBooks: 5)
+    LibraryStatsView(totalBooks: 10, readBooks: 5, lentBooks: 2, showingLentBooks: .constant(false))
+        .padding()
 }

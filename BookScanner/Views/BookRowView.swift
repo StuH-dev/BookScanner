@@ -2,73 +2,89 @@ import SwiftUI
 
 struct BookRowView: View {
     let book: Book
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Book Cover
-            if let coverURL = book.coverURL, let url = URL(string: coverURL) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                            .frame(width: 60, height: 90)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60, height: 90)
-                    case .failure:
-                        Image(systemName: "book.closed.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60, height: 90)
-                            .foregroundColor(.gray)
-                    @unknown default:
-                        EmptyView()
+        HStack(alignment: .top, spacing: 16) {
+            ZStack(alignment: .topLeading) {
+                // Book Cover
+                if let coverURL = book.coverURL, let url = URL(string: coverURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .frame(width: 60, height: 90)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 60, height: 90)
+                        case .failure(_):
+                            Image(systemName: "book.closed.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 60, height: 90)
+                                .foregroundColor(.gray)
+                        @unknown default:
+                            EmptyView()
+                        }
                     }
+                } else {
+                    Image(systemName: "book.closed.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 90)
+                        .foregroundColor(.gray)
                 }
-            } else {
-                Image(systemName: "book.closed.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 60, height: 90)
-                    .foregroundColor(.gray)
+                
+                // Lent indicator
+                if book.lentTo != nil {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 12))
+                        .padding(4)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .foregroundColor(.orange)
+                        .offset(x: -5, y: -5)
+                }
             }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(book.title)
                     .font(.headline)
                     .lineLimit(2)
+                    .foregroundColor(.primary)
                 
                 Text(book.author)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                 
-                if let publishedDate = book.publishedDate {
-                    Text(publishedDate)
+                if let lentTo = book.lentTo {
+                    Text("Lent to: \(lentTo)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.orange)
                 }
             }
+            
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(10)
-        .shadow(radius: 2)
+        .background(Color.clear)
     }
 }
 
 #Preview {
     BookRowView(book: Book(
-        isbn: "9781234567890",
-        title: "Sample Book",
-        author: "Sample Author",
+        isbn: "123",
+        title: "Sample Book with a Very Long Title That Should Wrap",
+        author: "Author Name",
         description: "A sample description",
         coverURL: nil,
         publishedDate: "2023",
-        isRead: false
+        isRead: false,
+        lentTo: "John Doe"
     ))
     .padding()
 }

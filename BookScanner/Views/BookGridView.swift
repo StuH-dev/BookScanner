@@ -42,6 +42,7 @@ struct BookGridView: View {
 struct BookGridCell: View {
     let book: Book
     let isRead: () -> Bool
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .center, spacing: 8) {
@@ -74,14 +75,31 @@ struct BookGridCell: View {
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(alignment: .topTrailing) {
-                    if isRead() {
-                        Image(systemName: "bookmark.fill")
-                            .foregroundColor(.green)
-                            .padding(4)
-                            .background(.ultraThinMaterial)
-                            .clipShape(Circle())
-                            .padding(4)
+                .overlay {
+                    ZStack(alignment: .top) {
+                        if isRead() {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "bookmark.fill")
+                                    .foregroundColor(.green)
+                                    .padding(4)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Circle())
+                                    .padding(4)
+                            }
+                        }
+                        
+                        if book.lentTo != nil {
+                            HStack {
+                                Image(systemName: "person.fill")
+                                    .foregroundColor(.orange)
+                                    .padding(4)
+                                    .background(.ultraThinMaterial)
+                                    .clipShape(Circle())
+                                    .padding(4)
+                                Spacer()
+                            }
+                        }
                     }
                 }
                 .shadow(radius: 4)
@@ -97,27 +115,51 @@ struct BookGridCell: View {
                             .foregroundColor(.gray)
                             .padding(40)
                     )
+                    .overlay {
+                        ZStack(alignment: .top) {
+                            if isRead() {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "bookmark.fill")
+                                        .foregroundColor(.green)
+                                        .padding(4)
+                                        .background(.ultraThinMaterial)
+                                        .clipShape(Circle())
+                                        .padding(4)
+                                }
+                            }
+                            
+                            if book.lentTo != nil {
+                                HStack {
+                                    Image(systemName: "person.fill")
+                                        .foregroundColor(.orange)
+                                        .padding(4)
+                                        .background(.ultraThinMaterial)
+                                        .clipShape(Circle())
+                                        .padding(4)
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
             }
             
             VStack(spacing: 4) {
                 Text(book.title)
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .font(.system(size: 14, weight: .medium))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
+                    .foregroundColor(.primary)
                 
                 Text(book.author)
-                    .font(.caption2)
+                    .font(.system(size: 12))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            .frame(height: 55)
-            .padding(.horizontal, 4)
+            .frame(height: 60)
         }
         .frame(width: 150)
-        .background(Color(.systemBackground))
-        .cornerRadius(8)
-        .shadow(radius: 4)
+        .background(Color.clear)
     }
 }
 
@@ -126,13 +168,14 @@ struct BookGridCell: View {
         BookGridView(
             books: [
                 Book(
-                    isbn: "9781234567890",
+                    isbn: "123",
                     title: "Sample Book with a Very Long Title That Should Wrap",
-                    author: "Sample Author",
-                    description: "A sample book description that goes on for a while to test how the UI handles longer text.",
+                    author: "Author Name",
+                    description: "A sample description",
                     coverURL: nil,
                     publishedDate: "2023",
-                    isRead: false
+                    isRead: false,
+                    lentTo: "John Doe"
                 )
             ],
             toggleRead: { _ in },

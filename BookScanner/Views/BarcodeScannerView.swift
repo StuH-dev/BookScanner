@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import UserNotifications
 
 struct BarcodeScannerView: View {
     @ObservedObject var library: Library
@@ -8,6 +9,7 @@ struct BarcodeScannerView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var isManualEntry = false
+    @State private var cameraPermissionStatus: AVAuthorizationStatus = .notDetermined
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -15,7 +17,8 @@ struct BarcodeScannerView: View {
             if isManualEntry {
                 manualEntryView
             } else {
-                if AVCaptureDevice.authorizationStatus(for: .video) == .authorized {
+                switch cameraPermissionStatus {
+                case .authorized:
                     BarcodeScanner { result in
                         switch result {
                         case .success(let isbn):
@@ -25,8 +28,12 @@ struct BarcodeScannerView: View {
                         }
                     }
                     .ignoresSafeArea()
-                } else {
+                case .notDetermined:
                     requestCameraAccess
+                case .denied, .restricted:
+                    deniedCameraAccess
+                @unknown default:
+                    Text("Unknown camera authorization status")
                 }
             }
         }
@@ -48,8 +55,31 @@ struct BarcodeScannerView: View {
             Text(alertMessage)
         }
         .onAppear {
-            checkCameraPermission()
+            updateCameraPermissionStatus()
         }
+    }
+    
+    private var deniedCameraAccess: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "camera.fill")
+                .font(.system(size: 50))
+                .foregroundColor(.red)
+            
+            Text("Camera Access Denied")
+                .font(.title2)
+            
+            Text("Please enable camera access in Settings to scan book barcodes")
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+            
+            Button("Open Settings") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
     }
     
     private var requestCameraAccess: some View {
@@ -61,12 +91,12 @@ struct BarcodeScannerView: View {
             Text("Camera Access Required")
                 .font(.title2)
             
-            Text("Please allow camera access in Settings to scan book barcodes")
+            Text("Please allow camera access to scan book barcodes")
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
             
-            Button("Request Access") {
-                checkCameraPermission()
+            Button("Allow Camera Access") {
+                requestCameraPermission()
             }
             .buttonStyle(.borderedProminent)
         }
@@ -98,24 +128,21 @@ struct BarcodeScannerView: View {
         .padding()
     }
     
-    private func checkCameraPermission() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                DispatchQueue.main.async {
-                    if granted {
-                        isShowingScanner = true
-                    } else {
-                        showError("Camera access denied")
-                    }
+    private func updateCameraPermissionStatus() {
+        cameraPermissionStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        print("Camera permission status: \(cameraPermissionStatus.rawValue)")
+    }
+    
+    private func requestCameraPermission() {
+        print("Requesting camera permission...")
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            DispatchQueue.main.async {
+                print("Camera permission response: \(granted)")
+                updateCameraPermissionStatus()
+                if !granted {
+                    showError("Camera access denied")
                 }
             }
-        case .restricted, .denied:
-            showError("Camera access denied")
-        case .authorized:
-            isShowingScanner = true
-        @unknown default:
-            showError("Unknown camera authorization status")
         }
     }
     
@@ -125,12 +152,34 @@ struct BarcodeScannerView: View {
                 let book = try await GoogleBooksService().fetchBookDetails(isbn: isbn)
                 await MainActor.run {
                     library.addBook(book)
+                    sendBookAddedNotification(book: book)
                     dismiss()
                 }
             } catch {
                 await MainActor.run {
                     showError(error.localizedDescription)
                 }
+            }
+        }
+    }
+    
+    private func sendBookAddedNotification(book: Book) {
+        // Request notification permissions if not already granted
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if granted {
+                let content = UNMutableNotificationContent()
+                content.title = "Book Added to Library"
+                content.body = "\(book.title) by \(book.author) has been added to your library."
+                content.sound = .default
+                
+                // Create a trigger for immediate notification
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                
+                // Create the request
+                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                
+                // Add the request to the notification center
+                UNUserNotificationCenter.current().add(request)
             }
         }
     }

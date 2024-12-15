@@ -11,46 +11,16 @@ struct BarcodeScanner: UIViewRepresentable {
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
-        
-        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else {
-            checkCameraPermission { authorized in
-                if !authorized {
-                    onResult(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Camera access denied"])))
-                }
-            }
-            return view
-        }
-        
-        setupCaptureSession(view: view, context: context)
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {}
-    
-    private func checkCameraPermission(completion: @escaping (Bool) -> Void) {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            completion(true)
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                completion(granted)
-            }
-        case .denied, .restricted:
-            completion(false)
-        @unknown default:
-            completion(false)
-        }
-    }
-    
-    private func setupCaptureSession(view: UIView, context: Context) {
-        let captureSession = AVCaptureSession()
+        print("BarcodeScanner: makeUIView called")
         
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
               let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice) else {
+            print("BarcodeScanner: Failed to setup video capture device")
             onResult(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to setup camera"])))
-            return
+            return view
         }
         
+        let captureSession = AVCaptureSession()
         let metadataOutput = AVCaptureMetadataOutput()
         
         if captureSession.canAddInput(videoInput) && captureSession.canAddOutput(metadataOutput) {
@@ -65,9 +35,27 @@ struct BarcodeScanner: UIViewRepresentable {
             previewLayer.videoGravity = .resizeAspectFill
             view.layer.addSublayer(previewLayer)
             
+            // Update preview layer frame when view is resized
+            view.layer.addSublayer(previewLayer)
+            view.backgroundColor = .black
+            
             DispatchQueue.global(qos: .userInitiated).async {
+                print("BarcodeScanner: Starting capture session")
                 captureSession.startRunning()
             }
+            
+            print("BarcodeScanner: Setup completed successfully")
+        } else {
+            print("BarcodeScanner: Failed to setup capture session")
+            onResult(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to setup camera"])))
+        }
+        
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        if let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer {
+            previewLayer.frame = uiView.layer.bounds
         }
     }
     
@@ -89,6 +77,7 @@ struct BarcodeScanner: UIViewRepresentable {
                let code = metadataObject.stringValue,
                Date().timeIntervalSince(lastScanTime) > scanInterval {
                 lastScanTime = Date()
+                print("BarcodeScanner: Scanned code: \(code)")
                 onResult(.success(code))
             }
         }
