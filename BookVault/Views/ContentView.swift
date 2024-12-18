@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var isDarkMode = false
     @State private var showingBackupAlert = false
     @State private var showingRestoreAlert = false
+    @State private var showingAbout = false
     @State private var searchText = ""
     @State private var selectedGenre: String?
     @State private var authorFilter = ""
@@ -84,6 +85,14 @@ struct ContentView: View {
                             }) {
                                 Label("Restore Library", systemImage: "arrow.down.doc")
                             }
+                            
+                            Divider()
+                            
+                            Button(action: {
+                                showingAbout = true
+                            }) {
+                                Label("About BookVault", systemImage: "info.circle")
+                            }
                         } label: {
                             Image(systemName: "ellipsis.circle")
                         }
@@ -119,6 +128,9 @@ struct ContentView: View {
             NavigationView {
                 AuthorSearchView(library: library)
             }
+        }
+        .sheet(isPresented: $showingAbout) {
+            AboutView()
         }
         .alert("Backup Library", isPresented: $showingBackupAlert) {
             Button("Cancel", role: .cancel) { }

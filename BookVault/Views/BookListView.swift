@@ -8,6 +8,7 @@ struct BookListView: View {
     @Binding var selectedGenre: String?
     @Binding var authorFilter: String
     @Binding var viewMode: ViewMode
+    @State private var showingLentBooks = false
     
     private var filteredBooks: [Book] {
         FilteredBooksHelper.getFilteredBooks(
@@ -18,26 +19,103 @@ struct BookListView: View {
         )
     }
     
+    private var lentBooks: [Book] {
+        library.books.filter { $0.lentTo != nil }
+    }
+    
     var body: some View {
-        Group {
-            if viewMode == .grid {
-                BookGridView(
-                    books: filteredBooks,
-                    toggleRead: toggleRead,
-                    isRead: isRead,
-                    library: library
-                )
-            } else {
-                BookTableView(
-                    books: filteredBooks,
-                    library: library,
-                    toggleRead: toggleRead,
-                    isRead: isRead
-                )
+        VStack(spacing: 0) {
+            // Stats view
+            LibraryStatsView(
+                totalBooks: library.books.count,
+                readBooks: library.books.filter { isRead($0.id) }.count,
+                lentBooks: lentBooks.count,
+                showingLentBooks: $showingLentBooks
+            )
+            .padding(.horizontal)
+            .padding(.top, 8)
+            
+            // Search bar
+            SearchBar(text: $searchText)
+                .padding(.horizontal)
+                .padding(.top, 8)
+            
+            // Genre filter
+            if !library.books.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(Array(Set(library.books.flatMap { $0.genres })).sorted(), id: \.self) { genre in
+                            Button(action: {
+                                if selectedGenre == genre {
+                                    selectedGenre = nil
+                                } else {
+                                    selectedGenre = genre
+                                }
+                            }) {
+                                Text(genre)
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(selectedGenre == genre ? Color.blue : Color.gray.opacity(0.2))
+                                    .foregroundColor(selectedGenre == genre ? .white : .primary)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+            }
+            
+            // Books view
+            Group {
+                if viewMode == .grid {
+                    BookGridView(
+                        books: filteredBooks,
+                        toggleRead: toggleRead,
+                        isRead: isRead,
+                        library: library
+                    )
+                } else {
+                    BookTableView(
+                        books: filteredBooks,
+                        library: library,
+                        toggleRead: toggleRead,
+                        isRead: isRead
+                    )
+                }
+            }
+            .background(Color(uiColor: .secondarySystemBackground))
+        }
+        .navigationTitle("My Books")
+        .sheet(isPresented: $showingLentBooks) {
+            NavigationView {
+                LentBooksView(library: library)
             }
         }
-        .background(Color(uiColor: .secondarySystemBackground)) // Modern background
-        .navigationTitle("My Books")
+    }
+}
+
+struct SearchBar: View {
+    @Binding var text: String
+    
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("Search books...", text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
     }
 }
 

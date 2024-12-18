@@ -31,26 +31,24 @@ struct CollectionsView: View {
         }
         .alert("Add Collection", isPresented: $showingAddCollection) {
             TextField("Collection Name", text: $newCollectionName)
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {
+                newCollectionName = ""
+            }
             Button("Add") {
                 if !newCollectionName.isEmpty {
-                    // Add an empty collection by adding it to a temporary book and removing the book
-                    let tempBook = Book(isbn: "temp", title: "temp", author: "temp", collections: [newCollectionName])
-                    library.addBook(tempBook)
-                    library.removeBook(tempBook)
+                    library.addCollection(newCollectionName)
                     newCollectionName = ""
                 }
             }
+        } message: {
+            Text("Enter a name for your new collection")
         }
     }
     
     private func deleteCollections(at offsets: IndexSet) {
         let collectionsToDelete = offsets.map { Array(library.getCollections()).sorted()[$0] }
         for collection in collectionsToDelete {
-            let booksInCollection = library.getBooksInCollection(collection)
-            for book in booksInCollection {
-                library.removeFromCollection(book, collection: collection)
-            }
+            library.removeCollection(collection)
         }
     }
 }
