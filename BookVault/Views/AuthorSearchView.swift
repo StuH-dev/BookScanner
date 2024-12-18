@@ -2,12 +2,13 @@ import SwiftUI
 
 struct AuthorSearchView: View {
     @ObservedObject var library: Library
+    @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var books: [Book] = []
     @State private var isSearching = false
     @State private var searchError: String?
     
-    private let googleBooksService = GoogleBooksService()
+    private let googleBooksService = GoogleBooksService.shared
     
     var body: some View {
         ZStack {
@@ -19,6 +20,9 @@ struct AuthorSearchView: View {
                     TextField("Enter author name", text: $searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .autocapitalization(.words)
+                        .onSubmit {
+                            performSearch()
+                        }
                     
                     Button(action: performSearch) {
                         Image(systemName: "magnifyingglass")
@@ -76,13 +80,6 @@ struct AuthorSearchView: View {
                                     .buttonStyle(.plain)
                                     .padding(.trailing)
                                 }
-                                .overlay(alignment: .topTrailing) {
-                                    if library.books.contains(where: { $0.isbn == book.isbn }) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                            .padding(8)
-                                    }
-                                }
                             }
                         }
                         .padding()
@@ -94,6 +91,13 @@ struct AuthorSearchView: View {
             .padding()
         }
         .navigationTitle("Search by Author")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        }
     }
     
     private func performSearch() {
