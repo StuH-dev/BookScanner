@@ -174,6 +174,7 @@ struct BookGridCell: View {
                     description: "A sample description",
                     coverURL: nil,
                     publishedDate: "2023",
+                    genres: ["Fiction", "Mystery"],
                     isRead: false,
                     lentTo: "John Doe"
                 )

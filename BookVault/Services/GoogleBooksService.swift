@@ -43,6 +43,7 @@ class GoogleBooksService {
                 description: volumeInfo.description,
                 coverURL: secureImageURL,
                 publishedDate: volumeInfo.publishedDate,
+                genres: volumeInfo.categories ?? [],
                 isRead: false
             )
         }
@@ -72,6 +73,7 @@ class GoogleBooksService {
             description: volumeInfo.description,
             coverURL: secureImageURL,
             publishedDate: volumeInfo.publishedDate,
+            genres: volumeInfo.categories ?? [],
             isRead: false
         )
     }
@@ -93,6 +95,7 @@ private struct VolumeInfo: Codable {
     let publishedDate: String?
     let imageLinks: ImageLinks?
     let industryIdentifiers: [IndustryIdentifier]?
+    let categories: [String]?
 }
 
 private struct ImageLinks: Codable {

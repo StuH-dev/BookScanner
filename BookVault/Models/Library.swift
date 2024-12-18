@@ -4,6 +4,7 @@ import Foundation
 class Library: ObservableObject {
     @Published private(set) var books: [Book] = []
     private let saveKey = "LibraryBooks"
+    private let storageService = StorageService.shared
     
     init() {
         loadBooks()
@@ -55,16 +56,43 @@ class Library: ObservableObject {
         return false
     }
     
+    // MARK: - Storage Operations
+    
     private func save() {
-        if let encoded = try? JSONEncoder().encode(books) {
-            UserDefaults.standard.set(encoded, forKey: saveKey)
+        do {
+            try storageService.save(books, forKey: saveKey)
+        } catch {
+            // In a real app, you might want to show an alert to the user
+            print("Failed to save library: \(error.localizedDescription)")
         }
     }
     
     private func loadBooks() {
-        if let data = UserDefaults.standard.data(forKey: saveKey),
-           let decoded = try? JSONDecoder().decode([Book].self, from: data) {
-            books = decoded
+        do {
+            books = try storageService.load(forKey: saveKey)
+        } catch {
+            print("Failed to load library: \(error.localizedDescription)")
+            // If load fails, start with an empty library
+            books = []
+        }
+    }
+    
+    // MARK: - Backup and Restore
+    
+    func createBackup() {
+        do {
+            try storageService.createBackup(books: books)
+        } catch {
+            print("Failed to create backup: \(error.localizedDescription)")
+        }
+    }
+    
+    func restoreFromBackup() {
+        do {
+            books = try storageService.restoreFromBackup()
+            save() // Save the restored books as the current library
+        } catch {
+            print("Failed to restore from backup: \(error.localizedDescription)")
         }
     }
 }

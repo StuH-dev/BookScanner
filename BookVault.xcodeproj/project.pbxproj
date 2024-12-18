@@ -7,26 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		4FAEBB662D0DC00E005983E3 /* BookScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FAEBB662D0DC00E005983E3 /* BookVault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookVault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4FAEBBA12D0E5423005983E3 /* Exceptions for "BookScanner" folder in "BookScanner" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 4FAEBB652D0DC00E005983E3 /* BookScanner */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4FAEBB682D0DC00E005983E3 /* BookScanner */ = {
+		4FAEBB682D0DC00E005983E3 /* BookVault */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				4FAEBBA12D0E5423005983E3 /* Exceptions for "BookScanner" folder in "BookScanner" target */,
-			);
-			path = BookScanner;
+			path = BookVault;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +32,7 @@
 		4FAEBB5D2D0DC00E005983E3 = {
 			isa = PBXGroup;
 			children = (
-				4FAEBB682D0DC00E005983E3 /* BookScanner */,
+				4FAEBB682D0DC00E005983E3 /* BookVault */,
 				4FAEBB672D0DC00E005983E3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,7 +40,7 @@
 		4FAEBB672D0DC00E005983E3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4FAEBB662D0DC00E005983E3 /* BookScanner.app */,
+				4FAEBB662D0DC00E005983E3 /* BookVault.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4FAEBB652D0DC00E005983E3 /* BookScanner */ = {
+		4FAEBB652D0DC00E005983E3 /* BookVault */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4FAEBB742D0DC00F005983E3 /* Build configuration list for PBXNativeTarget "BookScanner" */;
+			buildConfigurationList = 4FAEBB742D0DC00F005983E3 /* Build configuration list for PBXNativeTarget "BookVault" */;
 			buildPhases = (
 				4FAEBB622D0DC00E005983E3 /* Sources */,
 				4FAEBB632D0DC00E005983E3 /* Frameworks */,
@@ -74,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				4FAEBB682D0DC00E005983E3 /* BookScanner */,
+				4FAEBB682D0DC00E005983E3 /* BookVault */,
 			);
-			name = BookScanner;
+			name = BookVault;
 			packageProductDependencies = (
 			);
-			productName = BookScanner;
-			productReference = 4FAEBB662D0DC00E005983E3 /* BookScanner.app */;
+			productName = BookVault;
+			productReference = 4FAEBB662D0DC00E005983E3 /* BookVault.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -98,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4FAEBB612D0DC00E005983E3 /* Build configuration list for PBXProject "BookScanner" */;
+			buildConfigurationList = 4FAEBB612D0DC00E005983E3 /* Build configuration list for PBXProject "BookVault" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -112,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4FAEBB652D0DC00E005983E3 /* BookScanner */,
+				4FAEBB652D0DC00E005983E3 /* BookVault */,
 			);
 		};
 /* End PBXProject section */
@@ -264,27 +251,26 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BookScanner/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"BookVault/Preview Content\"";
 				DEVELOPMENT_TEAM = 66H7ZNGV8G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BookScanner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "";
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_CFBundleDisplayName = BookVault;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required to scan book barcodes";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo Library access is needed to save book covers";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.stuarthedger.BookScanner;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.stuarthedger.BookVault;
+				PRODUCT_MODULE_NAME = BookVault;
+				PRODUCT_NAME = BookVault;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -298,27 +284,26 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BookScanner/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"BookVault/Preview Content\"";
 				DEVELOPMENT_TEAM = 66H7ZNGV8G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BookScanner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "";
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_CFBundleDisplayName = BookVault;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required to scan book barcodes";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo Library access is needed to save book covers";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.stuarthedger.BookScanner;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.stuarthedger.BookVault;
+				PRODUCT_MODULE_NAME = BookVault;
+				PRODUCT_NAME = BookVault;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -328,7 +313,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4FAEBB612D0DC00E005983E3 /* Build configuration list for PBXProject "BookScanner" */ = {
+		4FAEBB612D0DC00E005983E3 /* Build configuration list for PBXProject "BookVault" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4FAEBB722D0DC00F005983E3 /* Debug */,
@@ -337,7 +322,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4FAEBB742D0DC00F005983E3 /* Build configuration list for PBXNativeTarget "BookScanner" */ = {
+		4FAEBB742D0DC00F005983E3 /* Build configuration list for PBXNativeTarget "BookVault" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4FAEBB752D0DC00F005983E3 /* Debug */,

@@ -13,27 +13,23 @@ struct BarcodeScannerView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        VStack {
-            if isManualEntry {
-                manualEntryView
-            } else {
-                switch cameraPermissionStatus {
-                case .authorized:
-                    BarcodeScanner { result in
-                        switch result {
-                        case .success(let isbn):
-                            handleISBN(isbn)
-                        case .failure(let error):
-                            showError(error.localizedDescription)
-                        }
+        ZStack {
+            BackgroundView()
+            
+            VStack {
+                if isManualEntry {
+                    manualEntryView
+                } else {
+                    switch cameraPermissionStatus {
+                    case .authorized:
+                        scannerPortalView
+                    case .notDetermined:
+                        requestCameraAccess
+                    case .denied, .restricted:
+                        deniedCameraAccess
+                    @unknown default:
+                        Text("Unknown camera authorization status")
                     }
-                    .ignoresSafeArea()
-                case .notDetermined:
-                    requestCameraAccess
-                case .denied, .restricted:
-                    deniedCameraAccess
-                @unknown default:
-                    Text("Unknown camera authorization status")
                 }
             }
         }
@@ -56,6 +52,58 @@ struct BarcodeScannerView: View {
         }
         .onAppear {
             updateCameraPermissionStatus()
+        }
+    }
+    
+    private var scannerPortalView: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Camera view
+                BarcodeScanner { result in
+                    switch result {
+                    case .success(let isbn):
+                        handleISBN(isbn)
+                    case .failure(let error):
+                        showError(error.localizedDescription)
+                    }
+                }
+                .ignoresSafeArea()
+                
+                // Scanning overlay
+                VStack {
+                    Spacer()
+                    
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.green, style: StrokeStyle(lineWidth: 4, dash: [10, 10]))
+                        .frame(width: geometry.size.width * 0.8, height: 200)
+                        .overlay(
+                            VStack {
+                                Text("Align barcode within the frame")
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.black.opacity(0.5))
+                                    .cornerRadius(10)
+                                
+                                Button(action: {
+                                    withAnimation {
+                                        isManualEntry = true
+                                    }
+                                }) {
+                                    Text("Enter ISBN Manually")
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.blue.opacity(0.7))
+                                        .cornerRadius(10)
+                                }
+                                .padding(.top)
+                            }
+                            .offset(y: 120)
+                        )
+                    
+                    Spacer()
+                }
+                .edgesIgnoringSafeArea(.all)
+            }
         }
     }
     

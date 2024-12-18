@@ -84,6 +84,13 @@ struct BookDetailView: View {
                                 .padding(.top, 8)
                         }
                         
+                        // Genres
+                        if !book.genres.isEmpty {
+                            Text("Genres: \(book.genres.joined(separator: ", "))")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        
                         // Lending Status
                         if isInLibrary {
                             VStack(alignment: .leading, spacing: 10) {
@@ -200,7 +207,9 @@ struct BookDetailView: View {
                 description: "This is a sample description for the book. It can be quite long and will wrap to multiple lines. The description provides details about the book's content and can help readers decide if they want to read it.",
                 coverURL: nil,
                 publishedDate: "2023",
-                isRead: false
+                genres: ["Fiction", "Mystery"],
+                isRead: false,
+                lentTo: nil
             ),
             toggleRead: {},
             isRead: { false },

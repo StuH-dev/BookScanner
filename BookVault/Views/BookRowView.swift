@@ -19,11 +19,13 @@ struct BookRowView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 60, height: 90)
+                                .cornerRadius(8) // Adds rounded corners to the image
                         case .failure(_):
                             Image(systemName: "book.closed.fill")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 60, height: 90)
+                                .cornerRadius(8) // Adds rounded corners to the fallback
                                 .foregroundColor(.gray)
                         @unknown default:
                             EmptyView()
@@ -34,6 +36,7 @@ struct BookRowView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 60, height: 90)
+                        .cornerRadius(8) // Adds rounded corners
                         .foregroundColor(.gray)
                 }
                 
@@ -60,6 +63,25 @@ struct BookRowView: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                 
+                if !book.genres.isEmpty {
+                    HStack {
+                        ForEach(book.genres.prefix(2), id: \.self) { genre in
+                            Text(genre)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.blue.opacity(0.1))
+                                .foregroundColor(.blue)
+                                .clipShape(Capsule())
+                        }
+                        if book.genres.count > 2 {
+                            Text("+\(book.genres.count - 2)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
                 if let lentTo = book.lentTo {
                     Text("Lent to: \(lentTo)")
                         .font(.caption)
@@ -71,7 +93,16 @@ struct BookRowView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.clear)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(
+                    colorScheme == .dark
+                    ? Color(uiColor: .secondarySystemBackground) // Dark mode support
+                    : Color(uiColor: .systemBackground) // Light mode support
+                )
+                .shadow(color: colorScheme == .dark ? .clear : Color.black.opacity(0.1), radius: 4, x: 0, y: 2) // Adds a subtle shadow
+        )
+        .padding(.horizontal)
     }
 }
 
@@ -83,6 +114,7 @@ struct BookRowView: View {
         description: "A sample description",
         coverURL: nil,
         publishedDate: "2023",
+        genres: ["Fiction", "Thriller", "Mystery"],
         isRead: false,
         lentTo: "John Doe"
     ))

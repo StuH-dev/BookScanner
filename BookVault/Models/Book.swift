@@ -8,6 +8,7 @@ struct Book: Identifiable, Hashable, Codable {
     let description: String?
     let coverURL: String?
     let publishedDate: String?
+    let genres: [String]
     var isRead: Bool
     var lentTo: String?
     var lentDate: Date?
@@ -20,7 +21,7 @@ struct Book: Identifiable, Hashable, Codable {
         lhs.isbn == rhs.isbn
     }
     
-    init(isbn: String, title: String, author: String, description: String? = nil, coverURL: String? = nil, publishedDate: String? = nil, isRead: Bool = false, lentTo: String? = nil, lentDate: Date? = nil) {
+    init(isbn: String, title: String, author: String, description: String? = nil, coverURL: String? = nil, publishedDate: String? = nil, genres: [String] = [], isRead: Bool = false, lentTo: String? = nil, lentDate: Date? = nil) {
         self.id = UUID()
         self.isbn = isbn
         self.title = title
@@ -28,6 +29,7 @@ struct Book: Identifiable, Hashable, Codable {
         self.description = description
         self.coverURL = coverURL
         self.publishedDate = publishedDate
+        self.genres = genres
         self.isRead = isRead
         self.lentTo = lentTo
         self.lentDate = lentDate
