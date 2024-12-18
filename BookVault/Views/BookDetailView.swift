@@ -240,6 +240,29 @@ struct BookDetailView: View {
             if isInLibrary {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
+                        if let lentTo = book.lentTo {
+                            Button {
+                                library.returnBook(book)
+                            } label: {
+                                Label("Return Book", systemImage: "person.fill.badge.minus")
+                            }
+                        } else {
+                            Button {
+                                showingLendSheet = true
+                            } label: {
+                                Label("Lend Book", systemImage: "person.badge.plus")
+                            }
+                        }
+                        
+                        Button {
+                            selectedCollections = book.collections
+                            showingCollectionSheet = true
+                        } label: {
+                            Label("Manage Collections", systemImage: "folder.badge.plus")
+                        }
+                        
+                        Divider()
+                        
                         Button {
                             toggleRead()
                         } label: {
