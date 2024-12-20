@@ -22,9 +22,9 @@ struct ColorTheme {
     static let error = Color.red                   // System Red
     
     // Dark mode colors
-    static let darkBackgroundPrimary = Color(hex: "000000")
-    static let darkBackgroundSecondary = Color(hex: "1C1C1E")
-    static let darkBackgroundElevated = Color(hex: "2C2C2E")
+    static let darkBackgroundPrimary = Color(hex: "1C1C1E")    // Dark Gray
+    static let darkBackgroundSecondary = Color(hex: "2C2C2E")  // Slightly lighter Dark Gray
+    static let darkBackgroundElevated = Color(hex: "3C3C3E")   // Elevated Dark surfaces
     
     // Modern accents
     static let tint = Color(hex: "007AFF")        // iOS Tint
@@ -61,6 +61,7 @@ extension Color {
         default:
             (a, r, g, b) = (1, 1, 1, 0)
         }
+        
         self.init(
             .sRGB,
             red: Double(r) / 255,

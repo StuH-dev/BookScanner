@@ -8,26 +8,41 @@ struct BackgroundView: View {
             Color.adaptiveBackground(colorScheme)
                 .ignoresSafeArea()
             
-            // Create subtle gradient circles for the background
-            Circle()
-                .fill(ColorTheme.primary.opacity(0.1))
-                .frame(width: 250, height: 250)
-                .blur(radius: 30)
-                .offset(x: -100, y: -150)
-            
-            Circle()
-                .fill(ColorTheme.secondary.opacity(0.1))
-                .frame(width: 300, height: 300)
-                .blur(radius: 40)
-                .offset(x: 100, y: -120)
-            
-            Circle()
-                .fill(ColorTheme.accent.opacity(0.1))
-                .frame(width: 200, height: 200)
-                .blur(radius: 20)
-                .offset(x: 50, y: 150)
+            GeometryReader { geometry in
+                // Top gradient
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                ColorTheme.primary.opacity(0.1),
+                                ColorTheme.secondary.opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: geometry.size.width * 0.7)
+                    .offset(x: -geometry.size.width * 0.2, y: -geometry.size.height * 0.2)
+                    .blur(radius: 50)
+                
+                // Bottom gradient
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                ColorTheme.accent.opacity(0.1),
+                                ColorTheme.primary.opacity(0.05)
+                            ],
+                            startPoint: .bottomTrailing,
+                            endPoint: .topLeading
+                        )
+                    )
+                    .frame(width: geometry.size.width * 0.8)
+                    .offset(x: geometry.size.width * 0.2, y: geometry.size.height * 0.2)
+                    .blur(radius: 50)
+            }
         }
-        .ignoresSafeArea()
+        .background(Color.adaptiveBackground(colorScheme))
     }
 }
 

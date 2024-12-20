@@ -4,21 +4,42 @@ struct CollectionsView: View {
     @ObservedObject var library: Library
     @State private var newCollectionName: String = ""
     @State private var showingAddCollection = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        List {
-            Section(header: Text("Collections")) {
-                ForEach(Array(library.getCollections()).sorted(), id: \.self) { collection in
-                    NavigationLink(destination: CollectionDetailView(library: library, collection: collection)) {
-                        HStack {
-                            Text(collection)
-                            Spacer()
-                            Text("\(library.getBooksInCollection(collection).count)")
-                                .foregroundColor(.secondary)
+        ZStack {
+            Color.adaptiveBackground(colorScheme)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    ForEach(Array(library.getCollections()).sorted(), id: \.self) { collection in
+                        NavigationLink(destination: CollectionDetailView(library: library, collection: collection)) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(collection)
+                                        .font(.headline)
+                                        .foregroundColor(ColorTheme.textPrimary)
+                                    
+                                    Text("\(library.getBooksInCollection(collection).count) books")
+                                        .font(.subheadline)
+                                        .foregroundColor(ColorTheme.textSecondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(ColorTheme.textSecondary)
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
+                            .padding()
+                            .background(Color.adaptiveSurface(colorScheme))
+                            .cornerRadius(12)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
-                .onDelete(perform: deleteCollections)
+                .padding()
             }
         }
         .navigationTitle("Collections")
@@ -26,22 +47,28 @@ struct CollectionsView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingAddCollection = true }) {
                     Image(systemName: "plus")
+                        .foregroundColor(ColorTheme.primary)
                 }
             }
         }
         .alert("Add Collection", isPresented: $showingAddCollection) {
             TextField("Collection Name", text: $newCollectionName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
             Button("Cancel", role: .cancel) {
                 newCollectionName = ""
             }
+            
             Button("Add") {
                 if !newCollectionName.isEmpty {
                     library.addCollection(newCollectionName)
                     newCollectionName = ""
                 }
             }
+            .foregroundColor(ColorTheme.primary)
         } message: {
             Text("Enter a name for your new collection")
+                .foregroundColor(ColorTheme.textPrimary)
         }
     }
     
@@ -53,62 +80,8 @@ struct CollectionsView: View {
     }
 }
 
-struct CollectionDetailView: View {
-    @ObservedObject var library: Library
-    let collection: String
-    @State private var selectedBooks: Set<UUID> = []
-    @State private var showingBulkActions = false
-    @State private var sortOrder: SortOrder = .title
-    
-    enum SortOrder {
-        case title, author, dateAdded, rating
-    }
-    
-    var sortedBooks: [Book] {
-        let books = library.getBooksInCollection(collection)
-        switch sortOrder {
-        case .title:
-            return books.sorted { $0.title < $1.title }
-        case .author:
-            return books.sorted { $0.author < $1.author }
-        case .dateAdded:
-            return books.sorted { $0.dateAdded > $1.dateAdded }
-        case .rating:
-            return books.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }
-        }
-    }
-    
-    var body: some View {
-        List(sortedBooks) { book in
-            BookRowView(book: book)
-                .swipeActions {
-                    Button(role: .destructive) {
-                        library.removeFromCollection(book, collection: collection)
-                    } label: {
-                        Label("Remove", systemImage: "minus.circle")
-                    }
-                }
-        }
-        .navigationTitle(collection)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button("Sort by Title") {
-                        sortOrder = .title
-                    }
-                    Button("Sort by Author") {
-                        sortOrder = .author
-                    }
-                    Button("Sort by Date Added") {
-                        sortOrder = .dateAdded
-                    }
-                    Button("Sort by Rating") {
-                        sortOrder = .rating
-                    }
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
-                }
-            }
-        }
+#Preview {
+    NavigationView {
+        CollectionsView(library: Library())
     }
 }

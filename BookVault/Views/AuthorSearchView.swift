@@ -3,6 +3,7 @@ import SwiftUI
 struct AuthorSearchView: View {
     @ObservedObject var library: Library
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
     @State private var searchText = ""
     @State private var books: [Book] = []
     @State private var isSearching = false
@@ -11,93 +12,89 @@ struct AuthorSearchView: View {
     private let googleBooksService = GoogleBooksService.shared
     
     var body: some View {
-        ZStack {
-            BackgroundView()
-            
-            VStack(spacing: 0) {
-                // Search Bar
-                HStack {
-                    TextField("Enter author name", text: $searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.words)
-                        .onSubmit {
-                            performSearch()
-                        }
-                    
-                    Button(action: performSearch) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.blue)
+        VStack(spacing: 0) {
+            // Search Bar
+            HStack {
+                TextField("Enter author name", text: $searchText)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(8)
+                    .background(Color.adaptiveSurface(colorScheme))
+                    .cornerRadius(8)
+                    .autocapitalization(.words)
+                    .onSubmit {
+                        performSearch()
                     }
-                }
-                .padding()
-                .background(.ultraThinMaterial)
                 
-                // Content
-                if isSearching {
-                    Spacer()
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                    Spacer()
-                } else if let error = searchError {
-                    Spacer()
-                    Text(error)
-                        .foregroundColor(.red)
-                        .padding()
-                    Spacer()
-                } else if books.isEmpty && !searchText.isEmpty {
-                    Spacer()
-                    Text("No books found")
-                        .foregroundColor(.secondary)
-                        .padding()
-                    Spacer()
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(books, id: \.isbn) { book in
+                Button(action: performSearch) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(ColorTheme.primary)
+                        .padding(8)
+                        .background(Color.adaptiveSurface(colorScheme))
+                        .clipShape(Circle())
+                }
+            }
+            .padding()
+            
+            // Content
+            if isSearching {
+                Spacer()
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                Spacer()
+            } else if let error = searchError {
+                Spacer()
+                Text(error)
+                    .foregroundColor(ColorTheme.error)
+                    .padding()
+                Spacer()
+            } else if books.isEmpty && !searchText.isEmpty {
+                Spacer()
+                Text("No books found")
+                    .foregroundColor(ColorTheme.textSecondary)
+                    .padding()
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(books) { book in
+                            NavigationLink {
+                                BookDetailView(
+                                    book: book,
+                                    toggleRead: { library.toggleRead(book) },
+                                    isRead: { library.isRead(book) },
+                                    library: library
+                                )
+                            } label: {
                                 HStack {
-                                    NavigationLink {
-                                        BookDetailView(book: book, toggleRead: {
-                                            library.toggleRead(book)
-                                        }, isRead: {
-                                            library.isRead(book)
-                                        }, library: library)
-                                    } label: {
-                                        BookRowView(book: book)
-                                    }
-                                    .buttonStyle(.plain)
+                                    BookRowView(book: book, isRead: { library.isRead(book) })
                                     
-                                    // Add a button to add the book to the library
-                                    Button(action: {
-                                        library.addBook(book)
-                                    }) {
-                                        Image(systemName: library.books.contains(where: { $0.isbn == book.isbn }) 
-                                              ? "checkmark.circle.fill" 
-                                              : "plus.circle.fill")
-                                            .foregroundColor(library.books.contains(where: { $0.isbn == book.isbn }) 
-                                                            ? .green 
-                                                            : .blue)
+                                    Spacer()
+                                    
+                                    if library.books.contains(where: { $0.isbn == book.isbn }) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(ColorTheme.primary)
+                                            .padding(.trailing)
+                                    } else {
+                                        Button {
+                                            library.addBook(book)
+                                        } label: {
+                                            Image(systemName: "plus.circle.fill")
+                                                .foregroundColor(ColorTheme.primary)
+                                                .padding(.trailing)
+                                        }
                                     }
-                                    .buttonStyle(.plain)
-                                    .padding(.trailing)
                                 }
                             }
+                            .buttonStyle(.plain)
                         }
-                        .padding()
                     }
-                    .background(.ultraThinMaterial)
+                    .padding()
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .padding()
         }
+        .background(Color.adaptiveBackground(colorScheme))
         .navigationTitle("Search by Author")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Done") {
-                    dismiss()
-                }
-            }
-        }
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private func performSearch() {
@@ -105,20 +102,14 @@ struct AuthorSearchView: View {
         
         isSearching = true
         searchError = nil
-        books = []
         
         Task {
             do {
-                let results = try await googleBooksService.searchBooksByAuthor(searchText)
-                await MainActor.run {
-                    books = results
-                    isSearching = false
-                }
+                books = try await googleBooksService.searchBooksByAuthor(searchText)
+                isSearching = false
             } catch {
-                await MainActor.run {
-                    searchError = "Error searching for books: \(error.localizedDescription)"
-                    isSearching = false
-                }
+                searchError = error.localizedDescription
+                isSearching = false
             }
         }
     }

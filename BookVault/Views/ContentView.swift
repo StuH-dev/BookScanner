@@ -20,99 +20,101 @@ struct ContentView: View {
     }
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationView {
-                BookListView(
-                    library: library,
-                    toggleRead: { id in
-                        if let book = library.books.first(where: { $0.id == id }) {
-                            library.toggleRead(book)
-                        }
-                    },
-                    isRead: { id in
-                        library.books.first(where: { $0.id == id })?.isRead ?? false
-                    },
-                    searchText: $searchText,
-                    selectedGenre: $selectedGenre,
-                    authorFilter: $authorFilter,
-                    viewMode: $viewMode
-                )
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Menu {
-                            Button(action: {
-                                showingScanner.toggle()
-                            }) {
-                                Label("Scan Barcode", systemImage: "barcode.viewfinder")
+        ZStack {
+            Color.adaptiveBackground(colorScheme)
+                .ignoresSafeArea()
+            
+            TabView(selection: $selectedTab) {
+                NavigationView {
+                    BookListView(
+                        library: library,
+                        toggleRead: { id in
+                            if let book = library.books.first(where: { $0.id == id }) {
+                                library.toggleRead(book)
+                            }
+                        },
+                        isRead: { id in
+                            library.books.first(where: { $0.id == id })?.isRead ?? false
+                        },
+                        searchText: $searchText,
+                        selectedGenre: $selectedGenre,
+                        authorFilter: $authorFilter,
+                        viewMode: $viewMode
+                    )
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Menu {
+                                Button(action: {
+                                    showingScanner.toggle()
+                                }) {
+                                    Label("Scan Barcode", systemImage: "barcode.viewfinder")
+                                        .foregroundColor(ColorTheme.textPrimary)
+                                }
+                                
+                                Button(action: {
+                                    showingAuthorSearch.toggle()
+                                }) {
+                                    Label("Search by Author", systemImage: "magnifyingglass")
+                                        .foregroundColor(ColorTheme.textPrimary)
+                                }
+                                
+                                Divider()
+                                
+                                Button(action: {
+                                    viewMode = viewMode == .grid ? .list : .grid
+                                }) {
+                                    Label(
+                                        viewMode == .grid ? "Switch to List View" : "Switch to Grid View",
+                                        systemImage: viewMode == .grid ? "list.bullet" : "square.grid.2x2"
+                                    )
                                     .foregroundColor(ColorTheme.textPrimary)
+                                }
+                                
+                                Divider()
+                                
+                                Button(action: {
+                                    showingBackupAlert = true
+                                }) {
+                                    Label("Backup Library", systemImage: "arrow.up.doc")
+                                        .foregroundColor(ColorTheme.textPrimary)
+                                }
+                                
+                                Button(action: {
+                                    showingRestoreAlert = true
+                                }) {
+                                    Label("Restore Library", systemImage: "arrow.down.doc")
+                                        .foregroundColor(ColorTheme.textPrimary)
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .foregroundColor(ColorTheme.primary)
                             }
-                            
-                            Button(action: {
-                                showingAuthorSearch.toggle()
-                            }) {
-                                Label("Search by Author", systemImage: "magnifyingglass")
-                                    .foregroundColor(ColorTheme.textPrimary)
-                            }
-                            
-                            Divider()
-                            
-                            Button(action: {
-                                viewMode = viewMode == .grid ? .list : .grid
-                            }) {
-                                Label(
-                                    viewMode == .grid ? "Switch to List View" : "Switch to Grid View",
-                                    systemImage: viewMode == .grid ? "list.bullet" : "square.grid.2x2"
-                                )
-                                .foregroundColor(ColorTheme.textPrimary)
-                            }
-                            
-                            Divider()
-                            
-                            Button(action: {
-                                showingBackupAlert = true
-                            }) {
-                                Label("Backup Library", systemImage: "arrow.up.doc")
-                                    .foregroundColor(ColorTheme.textPrimary)
-                            }
-                            
-                            Button(action: {
-                                showingRestoreAlert = true
-                            }) {
-                                Label("Restore Library", systemImage: "arrow.down.doc")
-                                    .foregroundColor(ColorTheme.textPrimary)
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                                .foregroundColor(ColorTheme.primary)
                         }
                     }
                 }
+                .tabItem {
+                    Label("Library", systemImage: "books.vertical")
+                }
+                .tag(0)
+                
+                NavigationView {
+                    CollectionsView(library: library)
+                }
+                .tabItem {
+                    Label("Collections", systemImage: "folder")
+                }
+                .tag(1)
+                
+                NavigationView {
+                    AboutView()
+                }
+                .tabItem {
+                    Label("About", systemImage: "info.circle")
+                }
+                .tag(2)
             }
-            .tabItem {
-                Label("Library", systemImage: "books.vertical")
-                    .foregroundColor(ColorTheme.primary)
-            }
-            .tag(0)
-            
-            NavigationView {
-                CollectionsView(library: library)
-            }
-            .tabItem {
-                Label("Collections", systemImage: "folder")
-                    .foregroundColor(ColorTheme.primary)
-            }
-            .tag(1)
-            
-            NavigationView {
-                AboutView()
-            }
-            .tabItem {
-                Label("About", systemImage: "info.circle")
-                    .foregroundColor(ColorTheme.primary)
-            }
-            .tag(2)
+            .accentColor(ColorTheme.primary)
         }
-        .accentColor(ColorTheme.primary)
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerView(library: library)
         }
@@ -138,8 +140,6 @@ struct ContentView: View {
         } message: {
             Text("This will replace your current library with the backup. Are you sure?")
         }
-        .background(Color.adaptiveBackground(colorScheme))
-        .preferredColorScheme(colorScheme)
     }
 }
 

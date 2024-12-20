@@ -40,7 +40,7 @@ struct BookListView: View {
             // Search bar
             SearchBar(text: $searchText)
                 .padding(.horizontal)
-                .padding(.top, 8)
+                .padding(.vertical, 8)
             
             // Genre filter
             if !library.books.isEmpty {
@@ -58,7 +58,7 @@ struct BookListView: View {
                                     .font(.subheadline)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(selectedGenre == genre ? ColorTheme.primary : ColorTheme.backgroundSecondary)
+                                    .background(selectedGenre == genre ? ColorTheme.primary : Color.adaptiveSurface(colorScheme))
                                     .foregroundColor(selectedGenre == genre ? .white : ColorTheme.textPrimary)
                                     .clipShape(Capsule())
                                     .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
@@ -66,9 +66,8 @@ struct BookListView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.vertical, 8)
                 }
-                .background(Color.adaptiveSurface(colorScheme))
+                .padding(.bottom, 8)
             }
             
             // Books view
@@ -81,7 +80,7 @@ struct BookListView: View {
                         library: library
                     )
                 } else {
-                    BookTableView(
+                    BooksListContent(
                         books: filteredBooks,
                         library: library,
                         toggleRead: toggleRead,
@@ -89,7 +88,6 @@ struct BookListView: View {
                     )
                 }
             }
-            .background(Color.adaptiveBackground(colorScheme))
         }
         .navigationTitle("My Books")
         .sheet(isPresented: $showingLentBooks) {
@@ -109,7 +107,7 @@ struct SearchBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(ColorTheme.textSecondary)
             
-            TextField("Search books...", text: $text)
+            TextField("Search books", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
                 .foregroundColor(ColorTheme.textPrimary)
             
@@ -130,7 +128,7 @@ struct SearchBar: View {
     }
 }
 
-struct BookTableView: View {
+struct BooksListContent: View {
     let books: [Book]
     @ObservedObject var library: Library
     let toggleRead: (UUID) -> Void
@@ -145,16 +143,7 @@ struct BookTableView: View {
                     isRead(book.id)
                 }, library: library)
             } label: {
-                BookRowView(book: book)
-                    .overlay(alignment: .trailing) {
-                        if isRead(book.id) {
-                            Image(systemName: "bookmark.fill")
-                                .foregroundColor(.green)
-                                .padding(8)
-                                .transition(.scale)
-                                .animation(.easeInOut(duration: 0.3), value: isRead(book.id))
-                        }
-                    }
+                BookRowView(book: book, isRead: { isRead(book.id) })
             }
         }
         .listStyle(.plain)
@@ -166,7 +155,7 @@ struct BookTableView: View {
         BookListView(
             library: Library(),
             toggleRead: { _ in },
-            isRead: { _ in true },
+            isRead: { _ in false },
             searchText: .constant(""),
             selectedGenre: .constant(nil),
             authorFilter: .constant(""),

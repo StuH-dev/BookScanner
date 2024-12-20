@@ -6,21 +6,21 @@ struct SplashScreenView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        ZStack {
+        Group {
             if !showMainContent {
                 ZStack {
-                    Color.adaptiveBackground(colorScheme)
-                        .ignoresSafeArea()
+                    BackgroundView()
                     
                     VStack(spacing: 20) {
                         Image(systemName: "books.vertical.fill")
                             .font(.system(size: 80))
                             .foregroundColor(ColorTheme.primary)
+                            .shadow(color: ColorTheme.primary.opacity(0.3), radius: 10, x: 0, y: 5)
                         
                         Text("BookVault")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                            .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundColor(ColorTheme.textPrimary)
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                     }
                     .opacity(opacity)
                 }
@@ -35,14 +35,11 @@ struct SplashScreenView: View {
                         }
                     }
                 }
-            }
-            
-            if showMainContent {
+            } else {
                 ContentView()
                     .transition(.opacity)
             }
         }
-        .preferredColorScheme(colorScheme)
     }
 }
 

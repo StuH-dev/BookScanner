@@ -23,5 +23,4 @@ struct AppIcon: View {
 
 #Preview {
     AppIcon()
-        .previewLayout(.fixed(width: 1024, height: 1024))
 }

@@ -9,9 +9,16 @@ import SwiftUI
 
 @main
 struct BookVaultApp: App {
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some Scene {
         WindowGroup {
-            SplashScreenView()
+            ZStack {
+                Color.adaptiveBackground(colorScheme)
+                    .ignoresSafeArea()
+                
+                SplashScreenView()
+            }
         }
     }
 }
