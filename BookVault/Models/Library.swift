@@ -91,6 +91,21 @@ class Library: ObservableObject {
         }
     }
     
+    func renameCollection(from oldName: String, to newName: String) {
+        if oldName != newName {
+            for (index, book) in books.enumerated() {
+                if book.collections.contains(oldName) {
+                    books[index].removeFromCollection(oldName)
+                    books[index].addToCollection(newName)
+                }
+            }
+            collections.remove(oldName)
+            collections.insert(newName)
+            saveBooks()
+            saveCollections()
+        }
+    }
+    
     func getCollections() -> Set<String> {
         return collections
     }

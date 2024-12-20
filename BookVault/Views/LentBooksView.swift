@@ -13,7 +13,30 @@ struct LentBooksView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(lentBooks) { book in
-                    BookRowView(book: book, isRead: { library.isRead(book) })
+                    HStack {
+                        NavigationLink {
+                            BookDetailView(
+                                book: book,
+                                toggleRead: { library.toggleRead(book) },
+                                isRead: { library.isRead(book) },
+                                library: library
+                            )
+                        } label: {
+                            BookRowView(book: book, isRead: { library.isRead(book) })
+                        }
+                        .buttonStyle(.plain)
+                        
+                        Button {
+                            library.returnBook(book)
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward.circle.fill")
+                                .imageScale(.large)
+                                .foregroundColor(ColorTheme.primary)
+                                .padding(8)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
             .padding()

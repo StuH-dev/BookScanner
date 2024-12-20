@@ -4,6 +4,9 @@ struct CollectionsView: View {
     @ObservedObject var library: Library
     @State private var newCollectionName: String = ""
     @State private var showingAddCollection = false
+    @State private var showingRenameCollection = false
+    @State private var selectedCollection: String? = nil
+    @State private var renameText: String = ""
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -37,6 +40,21 @@ struct CollectionsView: View {
                             .cornerRadius(12)
                         }
                         .buttonStyle(PlainButtonStyle())
+                        .contextMenu {
+                            Button {
+                                selectedCollection = collection
+                                renameText = collection
+                                showingRenameCollection = true
+                            } label: {
+                                Label("Rename", systemImage: "pencil")
+                            }
+                            
+                            Button(role: .destructive) {
+                                library.removeCollection(collection)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 }
                 .padding()
@@ -47,35 +65,70 @@ struct CollectionsView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingAddCollection = true }) {
                     Image(systemName: "plus")
+                        .imageScale(.large)
                         .foregroundColor(ColorTheme.primary)
                 }
             }
         }
-        .alert("Add Collection", isPresented: $showingAddCollection) {
-            TextField("Collection Name", text: $newCollectionName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            Button("Cancel", role: .cancel) {
-                newCollectionName = ""
-            }
-            
-            Button("Add") {
-                if !newCollectionName.isEmpty {
-                    library.addCollection(newCollectionName)
-                    newCollectionName = ""
+        .sheet(isPresented: $showingAddCollection) {
+            NavigationView {
+                Form {
+                    Section {
+                        TextField("Collection Name", text: $newCollectionName)
+                    }
+                }
+                .navigationTitle("New Collection")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            newCollectionName = ""
+                            showingAddCollection = false
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Add") {
+                            if !newCollectionName.isEmpty {
+                                library.addCollection(newCollectionName)
+                                newCollectionName = ""
+                                showingAddCollection = false
+                            }
+                        }
+                        .disabled(newCollectionName.isEmpty)
+                    }
                 }
             }
-            .foregroundColor(ColorTheme.primary)
-        } message: {
-            Text("Enter a name for your new collection")
-                .foregroundColor(ColorTheme.textPrimary)
         }
-    }
-    
-    private func deleteCollections(at offsets: IndexSet) {
-        let collectionsToDelete = offsets.map { Array(library.getCollections()).sorted()[$0] }
-        for collection in collectionsToDelete {
-            library.removeCollection(collection)
+        .sheet(isPresented: $showingRenameCollection) {
+            NavigationView {
+                Form {
+                    Section {
+                        TextField("Collection Name", text: $renameText)
+                    }
+                }
+                .navigationTitle("Rename Collection")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            renameText = ""
+                            selectedCollection = nil
+                            showingRenameCollection = false
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Rename") {
+                            if let collection = selectedCollection, !renameText.isEmpty {
+                                library.renameCollection(from: collection, to: renameText)
+                                renameText = ""
+                                selectedCollection = nil
+                                showingRenameCollection = false
+                            }
+                        }
+                        .disabled(renameText.isEmpty || renameText == selectedCollection)
+                    }
+                }
+            }
         }
     }
 }
