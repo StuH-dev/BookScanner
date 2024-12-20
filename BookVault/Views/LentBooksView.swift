@@ -43,6 +43,7 @@ struct LentBooksView: View {
         }
         .background(Color.adaptiveBackground(colorScheme))
         .navigationTitle("Lent Books")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Done") {
@@ -54,5 +55,8 @@ struct LentBooksView: View {
 }
 
 #Preview {
-    LentBooksView(library: Library())
+    NavigationView {
+        LentBooksView(library: Library())
+    }
+    .navigationViewStyle(.stack)
 }

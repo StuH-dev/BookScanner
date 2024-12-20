@@ -13,12 +13,15 @@ struct BookVaultApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                Color.adaptiveBackground(colorScheme)
-                    .ignoresSafeArea()
-                
-                SplashScreenView()
+            NavigationView {
+                ZStack {
+                    Color.adaptiveBackground(colorScheme)
+                        .ignoresSafeArea()
+                    
+                    SplashScreenView()
+                }
             }
+            .navigationViewStyle(.stack)
         }
     }
 }

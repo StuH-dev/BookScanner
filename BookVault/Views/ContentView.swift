@@ -92,6 +92,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .navigationViewStyle(.stack)
                 .tabItem {
                     Label("Library", systemImage: "books.vertical")
                 }
@@ -100,6 +101,7 @@ struct ContentView: View {
                 NavigationView {
                     CollectionsView(library: library)
                 }
+                .navigationViewStyle(.stack)
                 .tabItem {
                     Label("Collections", systemImage: "folder")
                 }
@@ -108,6 +110,7 @@ struct ContentView: View {
                 NavigationView {
                     AboutView()
                 }
+                .navigationViewStyle(.stack)
                 .tabItem {
                     Label("About", systemImage: "info.circle")
                 }
@@ -122,6 +125,7 @@ struct ContentView: View {
             NavigationView {
                 AuthorSearchView(library: library)
             }
+            .navigationViewStyle(.stack)
         }
         .alert("Backup Library", isPresented: $showingBackupAlert) {
             Button("Cancel", role: .cancel) { }
