@@ -3,22 +3,24 @@ import SwiftUI
 struct SplashScreenView: View {
     @State private var opacity = 0.0
     @State private var showMainContent = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
             if !showMainContent {
                 ZStack {
-                    Color(uiColor: .systemBackground)
+                    Color.adaptiveBackground(colorScheme)
                         .ignoresSafeArea()
                     
                     VStack(spacing: 20) {
                         Image(systemName: "books.vertical.fill")
                             .font(.system(size: 80))
-                            .foregroundColor(.orange)
+                            .foregroundColor(ColorTheme.primary)
                         
                         Text("BookVault")
                             .font(.largeTitle)
                             .fontWeight(.bold)
+                            .foregroundColor(ColorTheme.textPrimary)
                     }
                     .opacity(opacity)
                 }
@@ -40,6 +42,7 @@ struct SplashScreenView: View {
                     .transition(.opacity)
             }
         }
+        .preferredColorScheme(colorScheme)
     }
 }
 

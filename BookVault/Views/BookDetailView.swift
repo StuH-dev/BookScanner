@@ -6,6 +6,7 @@ struct BookDetailView: View {
     let isRead: () -> Bool
     @ObservedObject var library: Library
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
     @State private var showingLendSheet = false
     @State private var showingCollectionSheet = false
     @State private var borrowerName = ""
@@ -17,165 +18,161 @@ struct BookDetailView: View {
     }
     
     var body: some View {
-        ZStack {
-            BackgroundView()
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Cover Image and Rating
-                    VStack(spacing: 16) {
-                        Group {
-                            if let coverURL = book.coverURL, let url = URL(string: coverURL) {
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        ProgressView()
-                                            .frame(width: 200, height: 300)
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(height: 300)
-                                    case .failure(_):
-                                        Image(systemName: "book.closed.fill")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 200, height: 300)
-                                            .foregroundColor(.gray)
-                                    @unknown default:
-                                        EmptyView()
-                                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Cover Image and Rating
+                VStack(spacing: 16) {
+                    Group {
+                        if let coverURL = book.coverURL, let url = URL(string: coverURL) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                        .frame(width: 200, height: 300)
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(height: 300)
+                                case .failure(_):
+                                    Image(systemName: "book.closed.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 200, height: 300)
+                                        .foregroundColor(ColorTheme.textSecondary)
+                                @unknown default:
+                                    EmptyView()
                                 }
-                            } else {
-                                Image(systemName: "book.closed.fill")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 200, height: 300)
-                                    .foregroundColor(.gray)
                             }
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .shadow(radius: 5)
-                        
-                        if isInLibrary {
-                            RatingView(
-                                rating: book.rating ?? 0,
-                                onRatingChanged: { newRating in
-                                    library.updateBookRating(book, rating: newRating)
-                                },
-                                size: 24,
-                                spacing: 8
-                            )
+                        } else {
+                            Image(systemName: "book.closed.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 200, height: 300)
+                                .foregroundColor(ColorTheme.textSecondary)
                         }
                     }
-                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Title and Author
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(book.title)
-                                .font(.title)
-                                .fontWeight(.bold)
-                            
-                            Text(book.author)
-                                .font(.title3)
-                                .foregroundColor(.secondary)
-                        }
+                    if isInLibrary {
+                        RatingView(
+                            rating: book.rating ?? 0,
+                            onRatingChanged: { newRating in
+                                library.updateBookRating(book, rating: newRating)
+                            },
+                            size: 24,
+                            spacing: 8
+                        )
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    // Title and Author
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(book.title)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(ColorTheme.textPrimary)
                         
-                        // Published Date
+                        Text(book.author)
+                            .font(.title3)
+                            .foregroundColor(ColorTheme.textSecondary)
+                    }
+                    
+                    // Published Date and ISBN
+                    VStack(alignment: .leading, spacing: 4) {
                         if let publishedDate = book.publishedDate {
                             Text("Published: \(publishedDate)")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(ColorTheme.textSecondary)
                         }
                         
-                        // ISBN
                         Text("ISBN: \(book.isbn)")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        // Description
-                        if let description = book.description {
-                            Text(description)
-                                .font(.body)
-                                .padding(.top, 8)
-                        }
-                        
-                        // Genres
-                        if !book.genres.isEmpty {
-                            Text("Genres: \(book.genres.joined(separator: ", "))")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        // Collections
-                        if isInLibrary {
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Collections")
-                                        .font(.headline)
-                                    Spacer()
-                                    Button(action: {
-                                        selectedCollections = book.collections
-                                        showingCollectionSheet = true
-                                    }) {
-                                        Image(systemName: "folder.badge.plus")
-                                    }
-                                }
-                                
-                                if book.collections.isEmpty {
-                                    Text("Not in any collections")
-                                        .foregroundColor(.secondary)
-                                        .font(.subheadline)
-                                } else {
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack {
-                                            ForEach(Array(book.collections).sorted(), id: \.self) { collection in
-                                                Text(collection)
-                                                    .font(.subheadline)
-                                                    .padding(.horizontal, 12)
-                                                    .padding(.vertical, 6)
-                                                    .background(Color.blue.opacity(0.2))
-                                                    .foregroundColor(.blue)
-                                                    .clipShape(Capsule())
-                                            }
-                                        }
-                                    }
+                            .foregroundColor(ColorTheme.textSecondary)
+                    }
+                    .padding(.vertical, 4)
+                    
+                    // Description
+                    if let description = book.description {
+                        Text(description)
+                            .font(.body)
+                            .foregroundColor(ColorTheme.textPrimary)
+                            .padding(.top, 8)
+                    }
+                    
+                    // Genres
+                    if !book.genres.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(book.genres, id: \.self) { genre in
+                                    Text(genre)
+                                        .font(.caption)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(ColorTheme.backgroundSecondary)
+                                        .foregroundColor(ColorTheme.textPrimary)
+                                        .clipShape(Capsule())
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(ColorTheme.separator, lineWidth: 1)
+                                        )
                                 }
                             }
-                            .padding(.vertical, 8)
                         }
-                        
-                        // Lending Status
-                        if isInLibrary {
-                            VStack(alignment: .leading, spacing: 10) {
-                                if let lentTo = book.lentTo {
-                                    HStack {
-                                        Image(systemName: "person.fill")
-                                            .foregroundColor(.orange)
-                                        Text("Lent to: \(lentTo)")
-                                        Spacer()
-                                        Button("Return") {
-                                            library.returnBook(book)
-                                        }
-                                        .foregroundColor(.blue)
-                                    }
-                                } else {
-                                    Button(action: { showingLendSheet = true }) {
-                                        HStack {
-                                            Image(systemName: "person.badge.plus")
-                                            Text("Lend Book")
-                                        }
-                                    }
+                    }
+                    
+                    // Action Buttons
+                    if isInLibrary {
+                        VStack(spacing: 12) {
+                            Button(action: toggleRead) {
+                                HStack {
+                                    Image(systemName: isRead() ? "book.closed.fill" : "book")
+                                    Text(isRead() ? "Mark as Unread" : "Mark as Read")
                                 }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(ColorTheme.primary)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+                            
+                            Button(action: { showingLendSheet = true }) {
+                                HStack {
+                                    Image(systemName: "person.fill")
+                                    Text(book.lentTo == nil ? "Lend Book" : "Update Loan")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(ColorTheme.secondary)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
                             }
                         }
                     }
                 }
-                .padding()
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .padding()
+            }
+            .padding()
+            .background(Color.adaptiveBackground(colorScheme))
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if isInLibrary {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(action: { showingCollectionSheet = true }) {
+                            Label("Add to Collection", systemImage: "folder.badge.plus")
+                        }
+                        Button(role: .destructive, action: { showingDeleteAlert = true }) {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundColor(ColorTheme.primary)
+                    }
+                }
             }
         }
         .sheet(isPresented: $showingLendSheet) {
@@ -232,57 +229,6 @@ struct BookDetailView: View {
                         showingCollectionSheet = false
                     }
                 )
-            }
-        }
-        .navigationTitle(book.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if isInLibrary {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        if let lentTo = book.lentTo {
-                            Button {
-                                library.returnBook(book)
-                            } label: {
-                                Label("Return Book", systemImage: "person.fill.badge.minus")
-                            }
-                        } else {
-                            Button {
-                                showingLendSheet = true
-                            } label: {
-                                Label("Lend Book", systemImage: "person.badge.plus")
-                            }
-                        }
-                        
-                        Button {
-                            selectedCollections = book.collections
-                            showingCollectionSheet = true
-                        } label: {
-                            Label("Manage Collections", systemImage: "folder.badge.plus")
-                        }
-                        
-                        Divider()
-                        
-                        Button {
-                            toggleRead()
-                        } label: {
-                            Label(
-                                isRead() ? "Mark as Unread" : "Mark as Read",
-                                systemImage: isRead() ? "bookmark.slash" : "bookmark"
-                            )
-                        }
-                        
-                        Divider()
-                        
-                        Button(role: .destructive) {
-                            showingDeleteAlert = true
-                        } label: {
-                            Label("Remove Book", systemImage: "trash")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                }
             }
         }
         .alert("Remove Book", isPresented: $showingDeleteAlert) {

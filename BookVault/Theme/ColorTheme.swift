@@ -1,36 +1,48 @@
 import SwiftUI
 
 struct ColorTheme {
-    // Darker, more saturated pastel colors for better readability
-    static let primary = Color(red: 235/255, green: 175/255, blue: 185/255)    // Deeper rose pink
-    static let secondary = Color(red: 160/255, green: 190/255, blue: 235/255)  // Deeper pastel blue
-    static let accent = Color(red: 245/255, green: 215/255, blue: 150/255)     // Warmer golden yellow
-    static let background = Color(red: 248/255, green: 248/255, blue: 250/255) // Slightly cooler white
-    static let text = Color(red: 45/255, green: 45/255, blue: 45/255)          // Darker text for contrast
+    // Base colors - Modern iOS palette
+    static let primary = Color(hex: "007AFF")      // iOS Blue
+    static let secondary = Color(hex: "5856D6")    // iOS Purple
+    static let accent = Color(hex: "FF9500")       // iOS Orange
     
-    // Additional semantic colors
-    static let success = Color(red: 150/255, green: 200/255, blue: 170/255)    // Muted sage green
-    static let warning = Color(red: 240/255, green: 180/255, blue: 140/255)    // Soft coral
-    static let error = Color(red: 220/255, green: 130/255, blue: 140/255)      // Muted red
+    // Background colors
+    static let backgroundPrimary = Color(hex: "F2F2F7")  // iOS Light Gray
+    static let backgroundSecondary = Color(hex: "FFFFFF") // Pure White
+    static let backgroundElevated = Color(hex: "FFFFFF")  // Elevated surfaces
+    
+    // Text colors
+    static let textPrimary = Color(hex: "000000")        // Primary text
+    static let textSecondary = Color(hex: "3C3C43")      // Secondary text with 60% opacity
+    static let textTertiary = Color(hex: "3C3C43")       // Tertiary text with 30% opacity
+    
+    // Semantic colors - Using iOS system colors
+    static let success = Color.green               // System Green
+    static let warning = Color.orange              // System Orange
+    static let error = Color.red                   // System Red
+    
+    // Dark mode colors
+    static let darkBackgroundPrimary = Color(hex: "000000")
+    static let darkBackgroundSecondary = Color(hex: "1C1C1E")
+    static let darkBackgroundElevated = Color(hex: "2C2C2E")
+    
+    // Modern accents
+    static let tint = Color(hex: "007AFF")        // iOS Tint
+    static let separator = Color(hex: "3C3C43").opacity(0.2)
+    
+    // Card and surface colors
+    static let surface = Color(hex: "FFFFFF")
+    static let surfaceHighlighted = Color(hex: "F2F2F7")
 }
 
-// Commented out custom color extensions
-/*
 extension Color {
-    static let customBackground = Color("Background")
-    static let customForeground = Color("Foreground")
-    static let customAccent = Color.blue
+    static func adaptiveBackground(_ colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? ColorTheme.darkBackgroundPrimary : ColorTheme.backgroundPrimary
+    }
     
-    // Semantic colors
-    static let customSuccess = Color.green
-    static let customWarning = Color.orange
-    static let customError = Color.red
-}
-*/
-
-extension Color {
-    static let backgroundLight = Color(hex: "F9F9F9")
-    static let backgroundDark = Color(hex: "1C1C1C")
+    static func adaptiveSurface(_ colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? ColorTheme.darkBackgroundSecondary : ColorTheme.surface
+    }
 }
 
 extension Color {

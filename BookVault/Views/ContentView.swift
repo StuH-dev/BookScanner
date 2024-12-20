@@ -6,7 +6,6 @@ struct ContentView: View {
     @State private var showingScanner = false
     @State private var showingAuthorSearch = false
     @State private var showingLentBooks = false
-    @State private var isDarkMode = false
     @State private var showingBackupAlert = false
     @State private var showingRestoreAlert = false
     @State private var showingAbout = false
@@ -14,6 +13,7 @@ struct ContentView: View {
     @State private var selectedGenre: String?
     @State private var authorFilter = ""
     @State private var selectedTab = 0
+    @Environment(\.colorScheme) var colorScheme
     
     var availableGenres: [String] {
         Array(Set(library.books.flatMap { $0.genres })).sorted()
@@ -44,12 +44,14 @@ struct ContentView: View {
                                 showingScanner.toggle()
                             }) {
                                 Label("Scan Barcode", systemImage: "barcode.viewfinder")
+                                    .foregroundColor(ColorTheme.textPrimary)
                             }
                             
                             Button(action: {
                                 showingAuthorSearch.toggle()
                             }) {
                                 Label("Search by Author", systemImage: "magnifyingglass")
+                                    .foregroundColor(ColorTheme.textPrimary)
                             }
                             
                             Divider()
@@ -58,18 +60,10 @@ struct ContentView: View {
                                 viewMode = viewMode == .grid ? .list : .grid
                             }) {
                                 Label(
-                                    viewMode == .grid ? "List View" : "Grid View",
+                                    viewMode == .grid ? "Switch to List View" : "Switch to Grid View",
                                     systemImage: viewMode == .grid ? "list.bullet" : "square.grid.2x2"
                                 )
-                            }
-                            
-                            Button(action: {
-                                isDarkMode.toggle()
-                            }) {
-                                Label(
-                                    isDarkMode ? "Light Mode" : "Dark Mode",
-                                    systemImage: isDarkMode ? "sun.max" : "moon"
-                                )
+                                .foregroundColor(ColorTheme.textPrimary)
                             }
                             
                             Divider()
@@ -78,29 +72,25 @@ struct ContentView: View {
                                 showingBackupAlert = true
                             }) {
                                 Label("Backup Library", systemImage: "arrow.up.doc")
+                                    .foregroundColor(ColorTheme.textPrimary)
                             }
                             
                             Button(action: {
                                 showingRestoreAlert = true
                             }) {
                                 Label("Restore Library", systemImage: "arrow.down.doc")
-                            }
-                            
-                            Divider()
-                            
-                            Button(action: {
-                                showingAbout = true
-                            }) {
-                                Label("About BookVault", systemImage: "info.circle")
+                                    .foregroundColor(ColorTheme.textPrimary)
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
+                                .foregroundColor(ColorTheme.primary)
                         }
                     }
                 }
             }
             .tabItem {
-                Label("Books", systemImage: "book")
+                Label("Library", systemImage: "books.vertical")
+                    .foregroundColor(ColorTheme.primary)
             }
             .tag(0)
             
@@ -109,18 +99,20 @@ struct ContentView: View {
             }
             .tabItem {
                 Label("Collections", systemImage: "folder")
+                    .foregroundColor(ColorTheme.primary)
             }
             .tag(1)
             
             NavigationView {
-                BarcodeScannerView(library: library)
+                AboutView()
             }
             .tabItem {
-                Label("Scan", systemImage: "barcode.viewfinder")
+                Label("About", systemImage: "info.circle")
+                    .foregroundColor(ColorTheme.primary)
             }
             .tag(2)
         }
-        .preferredColorScheme(isDarkMode ? .dark : .light)
+        .accentColor(ColorTheme.primary)
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerView(library: library)
         }
@@ -129,21 +121,25 @@ struct ContentView: View {
                 AuthorSearchView(library: library)
             }
         }
-        .sheet(isPresented: $showingAbout) {
-            AboutView()
-        }
         .alert("Backup Library", isPresented: $showingBackupAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Backup") {
                 library.createBackup()
             }
+            .foregroundColor(ColorTheme.primary)
+        } message: {
+            Text("Create a backup of your library?")
         }
         .alert("Restore Library", isPresented: $showingRestoreAlert) {
             Button("Cancel", role: .cancel) { }
-            Button("Restore") {
+            Button("Restore", role: .destructive) {
                 library.restoreFromBackup()
             }
+        } message: {
+            Text("This will replace your current library with the backup. Are you sure?")
         }
+        .background(Color.adaptiveBackground(colorScheme))
+        .preferredColorScheme(colorScheme)
     }
 }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BookListView: View {
     @ObservedObject var library: Library
+    @Environment(\.colorScheme) var colorScheme
     let toggleRead: (UUID) -> Void
     let isRead: (UUID) -> Bool
     @Binding var searchText: String
@@ -34,6 +35,7 @@ struct BookListView: View {
             )
             .padding(.horizontal)
             .padding(.top, 8)
+            .background(Color.adaptiveSurface(colorScheme))
             
             // Search bar
             SearchBar(text: $searchText)
@@ -56,15 +58,17 @@ struct BookListView: View {
                                     .font(.subheadline)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(selectedGenre == genre ? Color.blue : Color.gray.opacity(0.2))
-                                    .foregroundColor(selectedGenre == genre ? .white : .primary)
+                                    .background(selectedGenre == genre ? ColorTheme.primary : ColorTheme.backgroundSecondary)
+                                    .foregroundColor(selectedGenre == genre ? .white : ColorTheme.textPrimary)
                                     .clipShape(Capsule())
+                                    .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
                             }
                         }
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
                 }
+                .background(Color.adaptiveSurface(colorScheme))
             }
             
             // Books view
@@ -85,7 +89,7 @@ struct BookListView: View {
                     )
                 }
             }
-            .background(Color(uiColor: .secondarySystemBackground))
+            .background(Color.adaptiveBackground(colorScheme))
         }
         .navigationTitle("My Books")
         .sheet(isPresented: $showingLentBooks) {
@@ -98,24 +102,31 @@ struct BookListView: View {
 
 struct SearchBar: View {
     @Binding var text: String
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
+                .foregroundColor(ColorTheme.textSecondary)
             
             TextField("Search books...", text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .textFieldStyle(PlainTextFieldStyle())
+                .foregroundColor(ColorTheme.textPrimary)
             
             if !text.isEmpty {
-                Button(action: {
-                    text = ""
-                }) {
+                Button(action: { text = "" }) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(ColorTheme.textSecondary)
                 }
             }
         }
+        .padding(8)
+        .background(Color.adaptiveSurface(colorScheme))
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(ColorTheme.separator, lineWidth: 1)
+        )
     }
 }
 
