@@ -10,14 +10,32 @@ struct BookListView: View {
     @Binding var authorFilter: String
     @Binding var viewMode: ViewMode
     @State private var showingLentBooks = false
+    @State private var sortOrder: SortOrder = .title
+    
+    enum SortOrder {
+        case title, author, dateAdded, rating
+    }
     
     private var filteredBooks: [Book] {
-        FilteredBooksHelper.getFilteredBooks(
+        let filtered = FilteredBooksHelper.getFilteredBooks(
             books: library.books,
             searchText: searchText,
             selectedGenre: selectedGenre,
             authorFilter: authorFilter
         )
+        
+        return filtered.sorted { book1, book2 in
+            switch sortOrder {
+            case .title:
+                return book1.title < book2.title
+            case .author:
+                return book1.author < book2.author
+            case .dateAdded:
+                return book1.dateAdded > book2.dateAdded
+            case .rating:
+                return (book1.rating ?? 0) > (book2.rating ?? 0)
+            }
+        }
     }
     
     private var lentBooks: [Book] {
@@ -90,6 +108,41 @@ struct BookListView: View {
             }
         }
         .navigationTitle("My Books")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        sortOrder = .title
+                    } label: {
+                        Label("Sort by Title", systemImage: sortOrder == .title ? "checkmark" : "")
+                    }
+                    
+                    Button {
+                        sortOrder = .author
+                    } label: {
+                        Label("Sort by Author", systemImage: sortOrder == .author ? "checkmark" : "")
+                    }
+                    
+                    Button {
+                        sortOrder = .dateAdded
+                    } label: {
+                        Label("Sort by Date Added", systemImage: sortOrder == .dateAdded ? "checkmark" : "")
+                    }
+                    
+                    Button {
+                        sortOrder = .rating
+                    } label: {
+                        Label("Sort by Rating", systemImage: sortOrder == .rating ? "checkmark" : "")
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .imageScale(.large)
+                        .foregroundColor(ColorTheme.primary)
+                        .padding(8)
+                        .contentShape(Rectangle())
+                }
+            }
+        }
         .sheet(isPresented: $showingLentBooks) {
             NavigationView {
                 LentBooksView(library: library)
